@@ -1,0 +1,1 @@
+<a href="{{ route('cameras.create') }}" class="btn btn-success">Add a camera <i class="fa fa-plus"></i></a>

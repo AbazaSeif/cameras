@@ -1,0 +1,1 @@
+<a href="{{ route('cameras.edit', $camera) }}" class="btn btn-sm btn-primary"><i class="fa fa-edit"></i></a>
