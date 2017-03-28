@@ -10,7 +10,8 @@
 | contains the "web" middleware group. Now create something great!
 |
 */
-
+use GrahamCampbell\GitHub\Facades\GitHub;
+use Github\Api\Deployment;
 Auth::routes();
 Route::group(['middleware' => 'auth'], function () {
     Route::get('/', ['as' => 'home', 'uses' => 'HomeController@index']);
@@ -23,3 +24,12 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('/video/proxy/{camera}', ['as' => 'cameras.proxy', 'uses' => 'CameraController@proxy']);
 });
 
+Route::get('create-deploy', function() {
+    $data = GitHub::api('deployment')->create('esalazarv', 'cameras', array('ref' => 'd93386d2cf6edd8c6172af48b8b4e6868663886e'));
+    dd($data);
+});
+
+Route::get('git-test', function() {
+   $deployments = GitHub::api('deployment')->all('esalazarv', 'cameras');
+   dd($deployments);
+});
