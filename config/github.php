@@ -22,7 +22,7 @@ return [
     |
     */
 
-    'default' => 'alternative',
+    'default' => 'main',
 
     /*
     |--------------------------------------------------------------------------
@@ -39,7 +39,7 @@ return [
     'connections' => [
 
         'main' => [
-            'token'      => 'my-token',
+            'token'      => env('GIT_TOKEN'),
             'method'     => 'token',
             // 'backoff'    => false,
             // 'cache'      => false,
@@ -48,8 +48,8 @@ return [
         ],
 
         'alternative' => [
-            'clientId'     => env('GIT_APP_ID', 'b45f79536b4eec0f8b45'),
-            'clientSecret' => env('GIT_APP_SECRET', 'c05d4596230b63d48c2c5490d2b912de2390c0f8'),
+            'clientId'     => env('GIT_APP_ID'),
+            'clientSecret' => env('GIT_APP_SECRET'),
             'method'       => 'application',
             // 'backoff'      => false,
             // 'cache'        => false,

@@ -25,11 +25,11 @@ Route::group(['middleware' => 'auth'], function () {
 });
 
 Route::get('create-deploy', function() {
-    $data = GitHub::api('deployment')->create('esalazarv', 'cameras', array('ref' => 'd93386d2cf6edd8c6172af48b8b4e6868663886e'));
+    $data = GitHub::api('deployment')->create('esalazarv', 'cameras', array('ref' => 'master'));
     dd($data);
 });
 
 Route::get('git-test', function() {
-   $deployments = GitHub::api('deployment')->all('esalazarv', 'cameras');
-   dd($deployments);
+    $manager = new App\Services\DeployManager();
+    $manager->checkDeploys('esalazarv', 'cameras');
 });
