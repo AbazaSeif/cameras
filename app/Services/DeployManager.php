@@ -3,6 +3,7 @@ namespace App\Services;
 
 use App\Deployment;
 use GrahamCampbell\GitHub\Facades\GitHub;
+use Symfony\Component\Process\Process;
 
 class DeployManager
 {
@@ -19,11 +20,17 @@ class DeployManager
             $exists = Deployment::find($deployment['id']);
             if (!$exists) {
                 $this->run(new Deployment($deployment));
+                dd('ok');
             }
         }
     }
 
     public function run(Deployment $deployment) {
-        var_dump($deployment->creator);
+        $path = base_path();
+        $command = "/home/vagrant/.config/composer/vendor/bin/envoy run deploy --branch={$deployment->ref}";
+        $process = new Process($command, $path);
+        $process->run(function ($type, $buffer) {
+            var_dump($buffer);
+        });
     }
 }
