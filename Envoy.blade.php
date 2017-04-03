@@ -42,6 +42,17 @@
         git clone {{ $repo }} --branch={{ $branch }} {{ $release }}
         echo "Repository cloned";
     fi
+
+    if [ ! -d "{{ $path }}/storage" ]; then
+        mv "{{ $release }}/storage" "{{ $path }}/__storage__"
+        ln -s "{{ $path }}/__storage__" "{{ $release }}/storage"
+        mkdir -p "{{ $path }}/__storage__/public"
+        ln -s "{{ $path }}/__storage__/public" "{{ $release }}/public/storage"
+        echo "Storage directory set up";
+    fi
+
+    cp {{ $release }}/.env.example {{ $release }}/.env;
+    echo "Environment file set up";
 @endtask
 
 @task('composer')
