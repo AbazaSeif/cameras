@@ -54,7 +54,12 @@ class CreateDeploy extends Command
      */
     public function handle()
     {
-        $data = GitHub::api('deployment')->create($this->user, $this->repository, array('ref' => 'master'));
-        dd($data);
+        $branch = $this->option('branch');
+        if (in_array($branch, $this->branches)) {
+            $data = GitHub::api('deployment')->create($this->user, $this->repository, array('ref' => $branch));
+            if(is_array($data) && isset($data['id'])){
+                $this->info("Deployment for '{$branch}' branch was created with id: {$data['id']}.");
+            }
+        }
     }
 }
