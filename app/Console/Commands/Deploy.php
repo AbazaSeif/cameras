@@ -14,7 +14,7 @@ class Deploy extends Command
      *
      * @var string
      */
-    protected $signature = 'iris:deploy {--branch=master} {--cleanup=true}';
+    protected $signature = 'iris:deploy {--branch=master} {--cleanup=true} {--force}';
 
     /**
      * The console command description.
