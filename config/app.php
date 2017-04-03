@@ -181,6 +181,7 @@ return [
          * Vendor Service Providers...
          */
         Collective\Html\HtmlServiceProvider::class,
+        GrahamCampbell\GitHub\GitHubServiceProvider::class,
     ],
 
     /*
@@ -235,6 +236,7 @@ return [
          */
         'Form' => Collective\Html\FormFacade::class,
         'Html' => Collective\Html\HtmlFacade::class,
+        'GitHub' => GrahamCampbell\GitHub\Facades\GitHub::class
     ],
 
 ];
