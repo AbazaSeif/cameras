@@ -26,6 +26,7 @@
     cache
     optimize
     swap-symlink
+    cleanup
 @endstory
 
 @task('init')
@@ -66,9 +67,9 @@
 @endtask
 
 @task('deployment_option_cleanup')
-    cd {{ dirname($release) }};
     @if ($cleanup)
-        ls -t | head -3 | xargs rm -Rf
+        {{-- search old projects that has not modified in the last day and remove 5 --}}
+        find {{ dirname($release) }} -maxdepth 1 -name "20*" -mmin 1440 | head -n 5 | xargs rm -rf
         echo "Cleaned up old deployments";
     @endif
 @endtask
