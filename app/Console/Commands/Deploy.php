@@ -41,7 +41,8 @@ class Deploy extends Command
         $repository = env('DEPLOY_REPOSITORY');
         $pieces = explode('/', $repository);
         $this->repository = str_replace('.git', '', array_pop($pieces));
-        $this->user = array_pop($pieces);
+        $base = explode(':', array_pop($pieces));
+        $this->user = array_pop($base);
         $this->deployments = $this->checkDeploys();
         $this->branches = $this->getBranches();
     }
