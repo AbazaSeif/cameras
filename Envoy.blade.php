@@ -11,6 +11,7 @@
     $date = (new DateTime())->format('YmdHis');
     $env = isset($env) ? $env : "production";
     $branch = isset($branch) ? $branch : "master";
+    $cleanup = isset($cleanup) ? $cleanup : true;
 
     $project = rtrim($path, '/');
     $path = dirname($project);
@@ -66,7 +67,7 @@
     echo 'Project optimized.'
 @endtask
 
-@task('deployment_option_cleanup')
+@task('cleanup')
     @if ($cleanup)
         {{-- search old projects that has not modified in the last day and remove 5 --}}
         find {{ dirname($release) }} -maxdepth 1 -name "20*" -mmin 1440 | head -n 5 | xargs rm -rf
