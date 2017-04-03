@@ -14,7 +14,7 @@ class Deploy extends Command
      *
      * @var string
      */
-    protected $signature = 'iris:deploy';
+    protected $signature = 'iris:deploy {--branch=master} {--cleanup=true}';
 
     /**
      * The console command description.
@@ -22,6 +22,10 @@ class Deploy extends Command
      * @var string
      */
     protected $description = 'Deploy project';
+
+    protected $user;
+
+    protected $repository;
 
     protected $branches;
 
@@ -34,16 +38,20 @@ class Deploy extends Command
     public function __construct()
     {
         parent::__construct();
-        $this->deployments = $this->checkDeploys('esalazarv', 'cameras');
-        $this->branches = $this->getBranches('esalazarv', 'cameras');
+        $repository = env('DEPLOY_REPOSITORY');
+        $pieces = explode('/', $repository);
+        $this->repository = str_replace('.git', '', array_pop($pieces));
+        $this->user = array_pop($pieces);
+        $this->deployments = $this->checkDeploys();
+        $this->branches = $this->getBranches();
     }
 
-    public function checkDeploys($user, $branch) {
-        return $deployments = collect(GitHub::api('deployment')->all($user, $branch))->sortByDesc('id');
+    public function checkDeploys() {
+        return $deployments = collect(GitHub::api('deployment')->all($this->user, $this->repository))->sortByDesc('id');
     }
 
-    public function getBranches($user, $branch) {
-        return array_column(GitHub::api('repo')->branches($user, $branch), 'name');
+    public function getBranches() {
+        return array_column(GitHub::api('repository')->branches($this->user, $this->repository), 'name');
     }
 
     /**
@@ -58,8 +66,13 @@ class Deploy extends Command
             $path = base_path();
             if (!$exists) {
                 $deploy = new Deployment($deployment);
-                $branch = in_array($deploy->ref, $this->branches) ? "--branch={$deploy->ref}" : null;
-                $command =  env('ENVOY_PATH', '~/.config/composer/vendor/bin/envoy') . " run deploy {$branch}";
+                if(in_array($deploy->ref, $this->branches) && !$this->option('force')) {
+                    $branch = $deploy->ref;
+                } else {
+                    $branch =  $this->option('branch');
+                }
+                $cleanup = $this->option('cleanup');
+                $command =  env('ENVOY_PATH', '~/.config/composer/vendor/bin/envoy') . " run deploy --branch={$branch} --cleanup={$cleanup}";
                 $process = new Process($command, $path);
                 $process->setTimeout(1800);
                 $process->setIdleTimeout(300);
