@@ -40,6 +40,7 @@
     else
         echo "Deployment ({{ $date }}) started";
         git clone {{ $repo }} --branch={{ $branch }} {{ $release }}
+        git pull origin {{ $branch }}
         echo "Repository cloned";
     fi
 
@@ -61,6 +62,8 @@
     echo 'Installing composer dependencies...'
     composer install --no-interaction --quiet --no-dev;
     echo 'Composer dependencies installed.'
+
+    php {{ $release }}/artisan key:generate
 @endtask
 
 @task('migrate')
