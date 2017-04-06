@@ -51,11 +51,10 @@ fi
 if [ ! -d "{{ $path }}/__storage__" ]; then
 mv "{{ $release }}/storage" "{{ $path }}/__storage__"
 mkdir -p "{{ $path }}/__storage__/public"
-else
-rm -rf "{{ $release }}/storage"
 fi
 
 {{-- Presist storage data --}}
+rm -r "{{ $release }}/storage"
 ln -s "{{ $path }}/__storage__" "{{ $release }}/storage"
 ln -s "{{ $path }}/__storage__/public" "{{ $release }}/public/storage"
 echo "Storage directory set up";
