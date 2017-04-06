@@ -68,7 +68,7 @@ echo "Environment file set up";
 {{-- Install composer dependencies --}}
 cd {{ $release }};
 echo 'Installing composer dependencies...'
-composer install --no-interaction --quiet --no-dev;
+composer install --no-interaction --no-dev;
 echo 'Composer dependencies installed.'
 @endtask
 
@@ -79,15 +79,15 @@ php {{ $release }}/artisan migrate --env={{ $env }} --force --no-interaction;
 
 @task('cache')
 {{-- Clear cache --}}
-php {{ $release }}/artisan view:clear --quiet;
-php {{ $release }}/artisan cache:clear --quiet;
-php {{ $release }}/artisan config:cache --quiet;
+php {{ $release }}/artisan view:clear;
+php {{ $release }}/artisan cache:clear;
+php {{ $release }}/artisan config:cache;
 echo 'Cache cleared.';
 @endtask
 
 @task('optimize')
 {{-- Optimize project --}}
-php {{ $release }}/artisan optimize --quiet;
+php {{ $release }}/artisan optimize;
 echo 'Project optimized.'
 @endtask
 
