@@ -27,9 +27,9 @@ class Deploy extends Command
 
     protected $repository;
 
-    protected $branches;
+    protected $branches = [];
 
-    protected $deployments;
+    protected $deployments = [];
 
     /**
      * Create a new command instance.
@@ -43,8 +43,14 @@ class Deploy extends Command
         $this->repository = str_replace('.git', '', array_pop($pieces));
         $base = explode(':', array_pop($pieces));
         $this->user = array_pop($base);
-        $this->deployments = $this->checkDeploys();
-        $this->branches = $this->getBranches();
+        if ($this->hasValidInfo()) {
+            $this->deployments = $this->checkDeploys();
+            $this->branches = $this->getBranches();
+        }
+    }
+
+    public function hasValidInfo(){
+        return (strlen($this->user) && strlen($this->repository));
     }
 
     public function checkDeploys() {

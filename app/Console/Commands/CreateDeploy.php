@@ -25,9 +25,9 @@ class CreateDeploy extends Command
 
     protected $repository;
 
-    protected $branches;
+    protected $branches = [];
 
-    protected $deployments;
+    protected $deployments = [];
 
     /**
      * Create a new command instance.
@@ -41,7 +41,13 @@ class CreateDeploy extends Command
         $this->repository = str_replace('.git', '', array_pop($pieces));
         $base = explode(':', array_pop($pieces));
         $this->user = array_pop($base);
-        $this->branches = $this->getBranches();
+        if ($this->hasValidInfo()) {
+            $this->branches = $this->getBranches();
+        }
+    }
+
+    public function hasValidInfo(){
+        return (strlen($this->user) && strlen($this->repository));
     }
 
     public function getBranches() {
@@ -56,7 +62,7 @@ class CreateDeploy extends Command
     public function handle()
     {
         $branch = $this->option('branch');
-        if (in_array($branch, $this->branches)) {
+        if (in_array($branch, $this->branches) && $this->hasValidInfo()) {
             $data = GitHub::api('deployment')->create($this->user, $this->repository, array('ref' => $branch));
             if(is_array($data) && isset($data['id'])){
                 $this->info("Deployment for '{$branch}' branch was created with id: {$data['id']}.");
