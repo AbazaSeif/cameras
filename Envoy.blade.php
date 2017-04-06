@@ -51,6 +51,8 @@ fi
 if [ ! -d "{{ $path }}/__storage__" ]; then
 mv "{{ $release }}/storage" "{{ $path }}/__storage__"
 mkdir -p "{{ $path }}/__storage__/public"
+else
+rm -r "{{ $release }}/storage"
 fi
 
 {{-- Presist storage data --}}
