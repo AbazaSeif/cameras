@@ -1,14 +1,14 @@
 @setup
-{{--
+/*
 require __DIR__.'/vendor/autoload.php';
 $dotenv = new Dotenv\Dotenv(__DIR__);
 
 $dotenv->load();
 $dotenv->required(['DEPLOY_REPOSITORY', 'DEPLOY_PROJECT'])->notEmpty();
---}}
-{{--$repo = getenv('DEPLOY_REPOSITORY');--}}
+*/
+//$repo = getenv('DEPLOY_REPOSITORY');
 $repo = 'git@github.com:esalazarv/cameras.git';
-{{--$path = getenv('DEPLOY_PROJECT');--}}
+//$path = getenv('DEPLOY_PROJECT');
 $path = '/home/vagrant/projects/deploy';
 
 $date = (new DateTime())->format('YmdHis');
