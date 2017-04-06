@@ -16,6 +16,7 @@ class DeployManager
 
     public function checkDeploys($user, $branch) {
         $deployments = collect($this->client->all($user, $branch))->sortByDesc('id');
+        dd($deployments);
         foreach ($deployments as $deployment) {
             $exists = Deployment::find($deployment['id']);
             if (!$exists) {
