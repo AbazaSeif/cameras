@@ -82,7 +82,7 @@ php {{ $release }}/artisan migrate --env={{ $env }} --force --no-interaction;
 {{-- Clear cache --}}
 php {{ $release }}/artisan view:clear;
 php {{ $release }}/artisan cache:clear;
-php {{ $release }}/artisan config:cache
+php {{ $release }}/artisan config:clear;
 echo 'Cache cleared.';
 @endtask
 
