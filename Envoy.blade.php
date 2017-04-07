@@ -60,7 +60,8 @@ ln -s "{{ $path }}/__storage__/public" "{{ $release }}/public/storage"
 echo "Storage directory set up";
 
 {{-- Update env file --}}
-cp {{ $release }}/.env.example {{ $release }}/.env;
+cp {{ dirname($release) }}/.env.example {{ $release }}/.env;
+ln -s "{{ dirname($release) }}/.env" "{{ $release }}/.env"
 echo "Environment file set up";
 @endtask
 
