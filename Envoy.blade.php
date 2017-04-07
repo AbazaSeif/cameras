@@ -27,6 +27,7 @@ migrate
 cache
 optimize
 swap-symlink
+restart-php
 cleanup
 @endstory
 
@@ -68,7 +69,7 @@ echo "Environment file set up";
 {{-- Install composer dependencies --}}
 cd {{ $release }};
 echo 'Installing composer dependencies...'
-composer install --no-interaction --no-dev;
+composer install --no-interaction --no-dev --quiet;
 echo 'Composer dependencies installed.'
 @endtask
 
@@ -81,7 +82,7 @@ php {{ $release }}/artisan migrate --env={{ $env }} --force --no-interaction;
 {{-- Clear cache --}}
 php {{ $release }}/artisan view:clear;
 php {{ $release }}/artisan cache:clear;
-php {{ $release }}/artisan config:clear;
+php {{ $release }}/artisan config:cache
 echo 'Cache cleared.';
 @endtask
 
@@ -101,7 +102,12 @@ echo 'Project optimized.'
 
 @task('swap-symlink')
 {{-- Update symplink --}}
+php {{ $release }}/artisan key:generate;
 ln -sfn "{{ $release }}" "{{ $project }}"
 echo 'v.{{ $date }}' > {{ $release }}/public/storage/version.html
 echo 'Version v.{{ $date }}';
+@endtask
+
+@task('restart-php')
+sudo service php7.1-fpm restart
 @endtask

@@ -63,8 +63,8 @@ class Deploy extends Command
 
     /**
      * Execute the console command.
-     *
      * @return mixed
+     * @throws \Exception
      */
     public function handle()
     {
@@ -79,7 +79,11 @@ class Deploy extends Command
                 $branch =  $this->option('branch');
             }
             $cleanup = $this->option('cleanup');
-            $command =  env('ENVOY_PATH', '~/.config/composer/vendor/bin/envoy') . " run deploy --branch={$branch} --cleanup={$cleanup}";
+            $envoy = env('ENVOY_PATH');
+            if (is_null($envoy)) {
+                throw new \Exception('Envoy path is required');
+            }
+            $command =  env('ENVOY_PATH') . " run deploy --branch={$branch} --cleanup={$cleanup}";
             $process = new Process($command, $path);
             $process->setTimeout(1800);
             $process->setIdleTimeout(300);
@@ -89,6 +93,8 @@ class Deploy extends Command
             if($process->isSuccessful()) {
                 $deploy->save();
             }
+        } else {
+            $this->info("Project is up to date");
         }
     }
 }
