@@ -29,7 +29,7 @@ class Deploy extends Command
 
     protected $branches = [];
 
-    protected $deployments = [];
+    protected $deployment;
 
     /**
      * Create a new command instance.
@@ -54,7 +54,7 @@ class Deploy extends Command
     }
 
     public function checkDeploys() {
-        return $deployments = collect(GitHub::api('deployment')->all($this->user, $this->repository))->sortByDesc('id');
+        return $deployment = collect(GitHub::api('deployment')->all($this->user, $this->repository))->sortByDesc('id')->first();
     }
 
     public function getBranches() {
@@ -68,27 +68,26 @@ class Deploy extends Command
      */
     public function handle()
     {
-        foreach ($this->deployments as $deployment) {
-            $exists = Deployment::find($deployment['id']);
-            $path = base_path();
-            if (!$exists) {
-                $deploy = new Deployment($deployment);
-                if(in_array($deploy->ref, $this->branches) && !$this->option('force')) {
-                    $branch = $deploy->ref;
-                } else {
-                    $branch =  $this->option('branch');
-                }
-                $cleanup = $this->option('cleanup');
-                $command =  env('ENVOY_PATH', '~/.config/composer/vendor/bin/envoy') . " run deploy --branch={$branch} --cleanup={$cleanup}";
-                $process = new Process($command, $path);
-                $process->setTimeout(1800);
-                $process->setIdleTimeout(300);
-                $process->run(function ($type, $buffer) {
-                    $this->info($buffer);
-                });
-                if($process->isSuccessful()) {
-                    $deploy->save();
-                }
+
+        $exists = Deployment::find($this->deployment['id']);
+        $path = base_path();
+        if (!$exists) {
+            $deploy = new Deployment($this->deployment);
+            if(in_array($deploy->ref, $this->branches) && !$this->option('force')) {
+                $branch = $deploy->ref;
+            } else {
+                $branch =  $this->option('branch');
+            }
+            $cleanup = $this->option('cleanup');
+            $command =  env('ENVOY_PATH', '~/.config/composer/vendor/bin/envoy') . " run deploy --branch={$branch} --cleanup={$cleanup}";
+            $process = new Process($command, $path);
+            $process->setTimeout(1800);
+            $process->setIdleTimeout(300);
+            $process->run(function ($type, $buffer) {
+                $this->info($buffer);
+            });
+            if($process->isSuccessful()) {
+                $deploy->save();
             }
         }
     }
