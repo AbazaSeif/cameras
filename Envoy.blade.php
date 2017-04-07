@@ -105,7 +105,7 @@ echo 'Project optimized.'
 php {{ $release }}/artisan key:generate;
 ln -sfn "{{ $release }}" "{{ $project }}"
 echo 'v.{{ $date }}' > {{ $release }}/public/storage/version.html
-echo 'Version v.{{ $date }}';
+echo 'Deploy release path: {{ $release }}';
 @endtask
 
 @task('restart-php')
