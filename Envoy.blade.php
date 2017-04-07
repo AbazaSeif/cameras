@@ -27,7 +27,7 @@ migrate
 cache
 optimize
 swap-symlink
-restart-php
+restart-services
 cleanup
 @endstory
 
@@ -108,6 +108,7 @@ echo 'v.{{ $date }}' > {{ $release }}/public/storage/version.html
 echo 'Deploy release path: {{ $release }}';
 @endtask
 
-@task('restart-php')
+@task('restart-services')
 sudo service php7.1-fpm restart
+sudo service nginx restart
 @endtask
