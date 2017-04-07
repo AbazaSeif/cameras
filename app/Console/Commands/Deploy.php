@@ -44,7 +44,7 @@ class Deploy extends Command
         $base = explode(':', array_pop($pieces));
         $this->user = array_pop($base);
         if ($this->hasValidInfo()) {
-            $this->deployments = $this->checkDeploys();
+            $this->deployment = $this->checkDeploys();
             $this->branches = $this->getBranches();
         }
     }
@@ -54,7 +54,7 @@ class Deploy extends Command
     }
 
     public function checkDeploys() {
-        return $deployment = collect(GitHub::api('deployment')->all($this->user, $this->repository))->sortByDesc('id')->first();
+        return collect(GitHub::api('deployment')->all($this->user, $this->repository))->sortByDesc('id')->first();
     }
 
     public function getBranches() {
