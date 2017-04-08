@@ -27,7 +27,6 @@ migrate
 cache
 optimize
 swap-symlink
-restart-services
 cleanup
 @endstory
 
@@ -82,7 +81,7 @@ php {{ $release }}/artisan migrate --env={{ $env }} --force --no-interaction;
 {{-- Clear cache --}}
 php {{ $release }}/artisan view:clear;
 php {{ $release }}/artisan cache:clear;
-php {{ $release }}/artisan config:clear;
+php {{ $release }}/artisan config:cache;
 echo 'Cache cleared.';
 @endtask
 
