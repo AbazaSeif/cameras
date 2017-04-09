@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    <div><h1>{{ "TEST!" }}</h1></div>
+    <div><h1>{{ config('app.version', 'NOT WORKS') }}</h1></div>
     @forelse($cameras->chunk(3) as $chunked)
     <div class="row">
         @foreach($chunked as $camera)
