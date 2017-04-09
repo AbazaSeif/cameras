@@ -28,6 +28,7 @@ migrate
 cache
 optimize
 swap-symlink
+restart-php
 cleanup
 @endstory
 
