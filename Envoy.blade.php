@@ -3,10 +3,11 @@ require __DIR__.'/vendor/autoload.php';
 $dotenv = new Dotenv\Dotenv(__DIR__);
 
 $dotenv->load();
-$dotenv->required(['REPOSITORY_URL', 'PROJECT_PATH'])->notEmpty();
+$dotenv->required(['REPOSITORY_URL', 'PROJECT_PATH', 'PHP_SERVICE_NAME'])->notEmpty();
 
 $repo = getenv('REPOSITORY_URL');
 $path = getenv('PROJECT_PATH');
+$phpServiceName = getenv('PHP_SERVICE_NAME');
 
 $date = (new DateTime())->format('YmdHis');
 $env = isset($env) ? $env : "production";
@@ -107,4 +108,10 @@ echo 'Updating symlink...'
 ln -sfn "{{ $release }}" "{{ $project }}"
 echo 'v.{{ $date }}' > {{ $release }}/public/storage/version.html
 echo 'Deploy release path: {{ $release }}';
+@endtask
+
+@task('restart-php')
+{{-- Restart PHP Service --}}
+echo 'Restarting PHP service...'
+sudo service {{ $phpServiceName }} restart
 @endtask

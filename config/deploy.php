@@ -8,4 +8,5 @@ return [
     ],
     'project_path' => env('PROJECT_PATH'),
     'envoy' => env('ENVOY'),
+    'php_service_name' => env('PHP_SERVICE_NAME', 'php7.0-fpm'),
 ];
