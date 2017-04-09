@@ -66,19 +66,21 @@ echo "Environment file set up";
 
 @task('composer')
 {{-- Install composer dependencies --}}
-cd {{ $release }};
 echo 'Installing composer dependencies...'
+cd {{ $release }};
 composer install --no-interaction --no-dev --quiet;
 echo 'Composer dependencies installed.'
 @endtask
 
 @task('migrate')
 {{-- Run migrations --}}
+echo 'Running migrations...'
 php {{ $release }}/artisan migrate --env={{ $env }} --force --no-interaction;
 @endtask
 
 @task('cache')
 {{-- Clear cache --}}
+echo 'Clearing cache...'
 php {{ $release }}/artisan view:clear;
 php {{ $release }}/artisan cache:clear;
 php {{ $release }}/artisan config:cache;
@@ -101,7 +103,7 @@ echo 'Project optimized.'
 
 @task('swap-symlink')
 {{-- Update symplink --}}
-php {{ $release }}/artisan key:generate;
+echo 'Updating symlink...'
 ln -sfn "{{ $release }}" "{{ $project }}"
 echo 'v.{{ $date }}' > {{ $release }}/public/storage/version.html
 echo 'Deploy release path: {{ $release }}';
