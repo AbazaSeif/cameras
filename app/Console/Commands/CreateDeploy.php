@@ -21,13 +21,13 @@ class CreateDeploy extends Command
      */
     protected $description = 'This create a deploy on github';
 
-    protected $user;
+    protected $config;
 
-    protected $repository;
+    protected $repo;
+
+    protected $envoy;
 
     protected $branches = [];
-
-    protected $deployments = [];
 
     /**
      * Create a new command instance.
@@ -36,22 +36,32 @@ class CreateDeploy extends Command
     public function __construct()
     {
         parent::__construct();
-        $repository = env('DEPLOY_REPOSITORY');
-        $pieces = explode('/', $repository);
-        $this->repository = str_replace('.git', '', array_pop($pieces));
-        $base = explode(':', array_pop($pieces));
-        $this->user = array_pop($base);
-        if ($this->hasValidInfo()) {
-            $this->branches = $this->getBranches();
+        $this->configure();
+    }
+
+    protected function configure() {
+        $this->config = config('deploy');
+        $this->repo = (object) $this->config['repository'];
+        $this->envoy = config('deploy.envoy', 'envoy');
+        if (!$this->hasValidConfig($this->repo)) {
+            $pieces = explode('/', $this->repo->url);
+            $this->repo->name = str_replace('.git', '', array_pop($pieces));
+            $pieces = explode(':', array_pop($pieces));
+            $this->repo->owner = array_pop($pieces);
         }
     }
 
-    public function hasValidInfo(){
-        return (strlen($this->user) && strlen($this->repository));
+    protected  function hasValidConfig($repo) {
+        return (strlen($repo->owner) && strlen($repo->name));
     }
 
-    public function getBranches() {
-        return array_column(GitHub::api('repository')->branches($this->user, $this->repository), 'name');
+    protected function getBranches() {
+        return array_column(GitHub::api('repository')
+            ->branches($this->repo->owner, $this->repo->name), 'name');
+    }
+
+    protected function isValidBranch($branch) {
+        return in_array($branch, $this->getBranches());
     }
 
     /**
@@ -62,8 +72,8 @@ class CreateDeploy extends Command
     public function handle()
     {
         $branch = $this->option('branch');
-        if (in_array($branch, $this->branches) && $this->hasValidInfo()) {
-            $data = GitHub::api('deployment')->create($this->user, $this->repository, array('ref' => $branch));
+        if ($this->isValidBranch($branch) && $this->hasValidConfig($this->repo)) {
+            $data = GitHub::api('deployment')->create($this->repo->owner, $this->repo->name, array('ref' => $branch));
             if(is_array($data) && isset($data['id'])){
                 $this->info("Deployment for '{$branch}' branch was created with id: {$data['id']}.");
             }
