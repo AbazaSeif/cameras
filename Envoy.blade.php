@@ -3,15 +3,15 @@ require __DIR__.'/vendor/autoload.php';
 $dotenv = new Dotenv\Dotenv(__DIR__);
 
 $dotenv->load();
-$dotenv->required(['DEPLOY_REPOSITORY', 'DEPLOY_PROJECT'])->notEmpty();
+$dotenv->required(['REPOSITORY_URL', 'PROJECT_PATH'])->notEmpty();
 
-$repo = getenv('DEPLOY_REPOSITORY');
-$path = getenv('DEPLOY_PROJECT');
+$repo = getenv('REPOSITORY_URL');
+$path = getenv('PROJECT_PATH');
 
 $date = (new DateTime())->format('YmdHis');
 $env = isset($env) ? $env : "production";
 $branch = isset($branch) ? $branch : "master";
-$cleanup = isset($cleanup) ? $cleanup : true;
+$cleanup = isset($noCleanup) ? false : true;
 
 $project = rtrim($path, '/');
 $path = dirname($project);
@@ -105,9 +105,4 @@ php {{ $release }}/artisan key:generate;
 ln -sfn "{{ $release }}" "{{ $project }}"
 echo 'v.{{ $date }}' > {{ $release }}/public/storage/version.html
 echo 'Deploy release path: {{ $release }}';
-@endtask
-
-@task('restart-services')
-sudo service php7.1-fpm restart
-sudo service nginx restart
 @endtask

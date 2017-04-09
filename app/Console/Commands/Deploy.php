@@ -14,7 +14,10 @@ class Deploy extends Command
      *
      * @var string
      */
-    protected $signature = 'iris:deploy {--branch=master} {--cleanup=true} {--force}';
+    protected $signature = 'iris:deploy 
+        {--branch= : The branch to deploy } 
+        {--force : Force the deployment to last commit, not store a record a deploy in database } 
+        {--no-cleanup : Not remove lasts releases  }';
 
     /**
      * The console command description.
@@ -23,9 +26,11 @@ class Deploy extends Command
      */
     protected $description = 'Deploy project';
 
-    protected $user;
+    protected $config;
 
-    protected $repository;
+    protected $repo;
+
+    protected $envoy;
 
     protected $branches = [];
 
@@ -38,27 +43,61 @@ class Deploy extends Command
     public function __construct()
     {
         parent::__construct();
-        $repository = env('DEPLOY_REPOSITORY');
-        $pieces = explode('/', $repository);
-        $this->repository = str_replace('.git', '', array_pop($pieces));
-        $base = explode(':', array_pop($pieces));
-        $this->user = array_pop($base);
-        if ($this->hasValidInfo()) {
-            $this->deployment = $this->checkDeploys();
-            $this->branches = $this->getBranches();
+        $this->configure();
+    }
+
+    protected  function hasValidConfig($repo) {
+        return (strlen($repo->owner) && strlen($repo->name));
+    }
+
+    protected function configure() {
+        $this->config = config('deploy');
+        $this->repo = (object) $this->config['repository'];
+        $this->envoy = config('deploy.envoy', 'envoy');
+        if (!$this->hasValidConfig($this->repo)) {
+            $pieces = explode('/', $this->repo->url);
+            $this->repo->name = str_replace('.git', '', array_pop($pieces));
+            $pieces = explode(':', array_pop($pieces));
+            $this->repo->owner = array_pop($pieces);
         }
     }
 
-    public function hasValidInfo(){
-        return (strlen($this->user) && strlen($this->repository));
+    protected function getDeployments() {
+        return collect(GitHub::api('deployment')
+            ->all($this->repo->owner, $this->repo->name));
     }
 
-    public function checkDeploys() {
-        return collect(GitHub::api('deployment')->all($this->user, $this->repository))->sortByDesc('id')->first();
+    protected function getMostRecentDeployment() {
+        $data = $this->getDeployments()
+            ->sortByDesc('id')
+            ->first();
+        return new Deployment($data);
     }
 
-    public function getBranches() {
-        return array_column(GitHub::api('repository')->branches($this->user, $this->repository), 'name');
+    protected function getBranches() {
+        return array_column(GitHub::api('repository')
+            ->branches($this->repo->owner, $this->repo->name), 'name');
+    }
+
+    protected function projectIsUpToDate($deployment_id) {
+        $result = Deployment::find($deployment_id);
+        return ($result instanceOf Deployment);
+    }
+
+    protected function isValidBranch($branch) {
+        return in_array($branch, $this->getBranches());
+    }
+
+    protected function isDeployable($branch) {
+        return true;
+    }
+
+    protected function buildOptions($branch) {
+        $options[] =  "--branch={$branch}";
+        if ($this->option('no-cleanup')) {
+            $options[] = '--no-cleanup';
+        }
+        return implode(' ', $options);
     }
 
     /**
@@ -68,30 +107,32 @@ class Deploy extends Command
      */
     public function handle()
     {
+        $this->deployment = $this->getMostRecentDeployment();
+        $branch = $this->deployment->ref;
+        if ($this->option('force') || !$this->projectIsUpToDate($this->deployment->id)) {
 
-        $exists = Deployment::find($this->deployment['id']);
-        $path = base_path();
-        if (!$exists) {
-            $deploy = new Deployment($this->deployment);
-            if(in_array($deploy->ref, $this->branches) && !$this->option('force')) {
-                $branch = $deploy->ref;
-            } else {
-                $branch =  $this->option('branch');
+            if(strlen($this->option('branch'))) {
+                if(!$this->isValidBranch($this->option('branch'))) {
+                    throw new \Exception("'{$this->option('branch')}' is not a valid branch");
+                }
+                $branch = $this->option('branch');
+            } elseif (!$this->isValidBranch($branch)) {
+                throw new \Exception("'{$this->option('branch')}' is not a valid branch");
             }
-            $cleanup = $this->option('cleanup');
-            $envoy = env('ENVOY_PATH');
-            if (is_null($envoy)) {
-                throw new \Exception('Envoy path is required');
+
+            if (!$this->isDeployable($branch)) {
+                throw new \Exception("'{$branch}' has not an Envoy.blade.php file");
             }
-            $command =  env('ENVOY_PATH') . " run deploy --branch={$branch} --cleanup={$cleanup}";
-            $process = new Process($command, $path);
+            $options = $this->buildOptions($branch);
+            $command =  $this->envoy . " run deploy {$options}";
+            $process = new Process($command, base_path());
             $process->setTimeout(1800);
             $process->setIdleTimeout(300);
             $process->run(function ($type, $buffer) {
                 $this->info($buffer);
             });
-            if($process->isSuccessful()) {
-                $deploy->save();
+            if($process->isSuccessful() && !$this->option('force')) {
+                $this->deployment->save();
             }
         } else {
             $this->info("Project is up to date");

@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    <h1>{{ env('APP_VERSION', 'NOT WORKS') }}</h1>
+    <h1>{{ config('app.version', 'NOT WORKS') }}</h1>
 <div class="container">
     <div class="row">
         <div class="col-md-8 col-md-offset-2">
